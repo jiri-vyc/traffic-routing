@@ -9,6 +9,11 @@ export class RoutesController {
     public constructor() {
         this.router = express.Router();
         this.service = new RoutesService();
+        this.router.get("/", this.FindRoute());
+    }
+
+    protected FindRoute = async (req: Request, res: Response, next: NextFunction) => {
+        res.send("ok");
     }
 
 }

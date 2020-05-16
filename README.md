@@ -12,7 +12,7 @@
 
 ## Run 
 
-Run in dev mode (watching for changes and re-building) `npm run dev-start`
+Run in dev mode (watching for changes and re-building on save) `npm run dev-start`
 
 Run in production mode `npm start`.
 

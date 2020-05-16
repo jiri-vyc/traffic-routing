@@ -1,8 +1,11 @@
 import * as express from "express";
+import * as httpLogger from "morgan";
 import { Request, Response, NextFunction} from "express";
 import { config } from "./config/config";
 import { HealthCheckController, RoutesController } from "./controllers";
-import { log } from "./helpers/Logger";
+import { log } from "./helpers";
+import { handle } from "./helpers";
+import { AuthenticationMiddleware } from "./middlewares";
 
 /**
  * Entry point of the application. Creates and configures an ExpressJS web server.
@@ -54,7 +57,8 @@ export class App {
      * Setup all the (general) middlewares
      */
     private middleware = (): void => {
-        // TODO this.express.use(getRequestLogger);
+        this.express.use(httpLogger("combined"));
+        this.express.use(new AuthenticationMiddleware().authenticate);
         this.express.use(this.setHeaders);
     }
 
@@ -71,15 +75,12 @@ export class App {
 
         // Error handler to catch all errors sent by routers (propagated through next(err))
         this.express.use((err: any, req: Request, res: Response, next: NextFunction) => {
+            handle(err);
             let errObject: { status: number, message: string } = {
                 status: err.status ? err.status : 500,
                 message: err.message ? err.message : "Unknown Server Error",
             };
-            // TODO: log.silly("Error caught by the router error handler.");
-            res.setHeader(
-                "Content-Type",
-                "application/json; charset=utf-8",
-            );
+            log.silly("Error caught by the router error handler.");
             res.status(errObject.status || 500).send(errObject);
         });
     }

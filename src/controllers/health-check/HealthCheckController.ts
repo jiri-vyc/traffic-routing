@@ -14,7 +14,7 @@ export class HealthCheckController {
 
     protected GetHealthCheck = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            res.send(this.service.GetStatus());
+            res.send(await this.service.GetStatus());
         } catch (err) {
             next(err);
         }
