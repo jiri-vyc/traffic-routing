@@ -6,7 +6,9 @@ export class AuthenticationMiddleware {
         const secretHeader = req.headers["x-secret"];
         const configService = new ConfigurationService();
         const globalPassword = await configService.GetGlobalPassword();
-        if (secretHeader !== globalPassword) {
+        if (!secretHeader) {
+            next({status: 401, message: "Unauthorized. Please provide `x-secret` header."});
+        } else if (secretHeader !== globalPassword) {
             next({status: 401, message: "Unauthorized"});
         } else {
             next();
