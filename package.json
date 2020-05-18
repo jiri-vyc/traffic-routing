@@ -1,13 +1,14 @@
 {
     "scripts": {
-        "start": "node .\\dist\\Server.js",
+        "start": "node -r dotenv/config .\\dist\\Server.js",
         "build-start": "tsc && node .\\dist\\Server.js",
         "build": "tsc",
-        "dev-start": "ts-node-dev .\\src\\Server.ts",
+        "dev-start": "ts-node-dev -r dotenv/config .\\src\\Server.ts",
         "test": "ava"
     },
     "dependencies": {
         "axios": "^0.19.2",
+        "dotenv": "^8.2.0",
         "express": "^4.17.1",
         "express-validator": "^6.4.1",
         "morgan": "^1.10.0",
@@ -21,11 +22,11 @@
         "typescript": "^3.9.2"
     },
     "ava": {
-		"extensions": [
-			"ts"
-		],
-		"require": [
-			"ts-node/register"
-		]
-	}
+        "extensions": [
+            "ts"
+        ],
+        "require": [
+            "ts-node/register"
+        ]
+    }
 }

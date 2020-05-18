@@ -16,6 +16,7 @@ export class RoutesService {
             throw new Error("Wrong input parameters for finding a route.");
         }
         log.debug(`Finding route from ${origin.lat},${origin.lon} to ${destination.lat},${destination.lon}`);
+        waypoints.forEach((waypoint) => log.debug(`through waypoint: ${waypoint.lat},${waypoint.lon}`));
 
         return this.ComputeFindBestAlternative(origin, destination, time, waypoints);
     }
@@ -84,15 +85,29 @@ export class RoutesService {
         return response.data.routes[0];
     }
 
-    private FindPositionOnRouteInTime = (route: IRoute, time: number): ILocation => {
-        return {
-            lat: 0,
-            lon: 0,
+    private FindPositionOnRouteInTime = (route: IRoute, targetTime: number): ILocation => {
+        let currentTime = 0;
+        let i = 0;
+        let allDurations: Array<number> = [];
+        for (const duration of route.legs) {
+            allDurations = allDurations.concat(duration.annotation.duration);
+        }
+        while (i < allDurations.length && currentTime < targetTime){
+            currentTime += allDurations[i];
+            i++;
+        }
+        const result = {
+            lat: route.geometry.coordinates[i][1],
+            lon: route.geometry.coordinates[i][0],
         };
+        log.debug(`After time ${targetTime} the car is at position ${result.lat},${result.lon}`);
+        return result;
     }
 
     // TODO: Placeholder, but will work most of the time
     private CalculateStraightDistance = (origin: ILocation, destination: ILocation) => {
-        return Math.sqrt( (destination.lon - origin.lon) * (destination.lon - origin.lon) + (destination.lat - origin.lat) * (destination.lat - origin.lat) );
+        const result = Math.sqrt( (destination.lon - origin.lon) * (destination.lon - origin.lon) + (destination.lat - origin.lat) * (destination.lat - origin.lat) );
+        log.debug(`Distance between ${origin.lat},${origin.lon} and ${destination.lat},${destination.lon} is ${result}`)
+        return result;
     }
 }

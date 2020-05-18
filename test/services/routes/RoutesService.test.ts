@@ -30,11 +30,33 @@ const testWaypoints = {
 }
 
 test('FindBestAlternative', async t => {
-    const res = new RoutesService().FindBestAlternative(testWaypoints.berlin, testWaypoints.mnichov, 180, [testWaypoints.frankfurt, testWaypoints.ostrava]);
+    // From Berlin to Munchen, either through Frankfurt or Ostrava, in 2 hours check the car's position
+    const res = new RoutesService().FindBestAlternative(testWaypoints.berlin, testWaypoints.mnichov, 7200, [testWaypoints.frankfurt, testWaypoints.ostrava]);
     t.deepEqual(await res, {
             winner_name: "Frankfurt",
             delays: {
                 "A": 0,
             },
         });
+    const res2 = new RoutesService().FindBestAlternative(testWaypoints.frankfurt, testWaypoints.norimberk, 7200, [testWaypoints.berlin, testWaypoints.mnichov]);
+    t.deepEqual(await res2, {
+            winner_name: "Mnichov",
+            delays: {
+                "A": 0,
+            },
+        });
+    const res3 = new RoutesService().FindBestAlternative(testWaypoints.norimberk, testWaypoints.berlin, 7200, [testWaypoints.ostrava, testWaypoints.mnichov]);
+        t.deepEqual(await res3, {
+                winner_name: "Ostrava",
+                delays: {
+                    "A": 0,
+                },
+            });
+    const res4 = new RoutesService().FindBestAlternative(testWaypoints.norimberk, testWaypoints.berlin, 14400, [testWaypoints.ostrava, testWaypoints.mnichov]);
+        t.deepEqual(await res4, {
+                winner_name: "Mnichov",
+                delays: {
+                    "A": 0,
+                },
+            });
 });
