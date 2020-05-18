@@ -1,0 +1,3 @@
+ErrorHandling should be improved upon (single error handling function, function codes, global Error definition)
+
+API should be RESTful. POSTing a payload just as parameters to GET some result is wrong. Either fully commit to this and use GraphQL or something, or re-design API to GET /best-alternative

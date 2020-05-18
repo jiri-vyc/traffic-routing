@@ -11,7 +11,7 @@ export class RoutesController {
     public constructor() {
         this.router = express.Router();
         this.service = new RoutesService();
-        this.router.post("/", 
+        this.router.post("/best-alternative", 
             body("origin.lat").exists().isNumeric(),
             body("origin.lon").exists().isNumeric(),
             body("destination.lat").exists().isNumeric(),
@@ -32,7 +32,7 @@ export class RoutesController {
         const time = req.body.time;
         const waypoints: IWaypoint[] = req.body.waypoints;
         try {
-            res.send(await this.service.FindRoute(origin, destination, time, waypoints));
+            res.send(await this.service.FindBestAlternative(origin, destination, time, waypoints));
         } catch (err) {
             next(err);
         }

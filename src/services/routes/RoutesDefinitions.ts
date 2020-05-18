@@ -14,6 +14,35 @@ export interface IWinnerWithDelaysResponse {
     };
 }
 
+export interface IRoute {
+    geometry: IGeometry;
+    legs: Array<IRouteLeg>;
+    duration: number;
+    distance: number;
+}
+
+export interface IGeometry {
+    coordinates: Array<Array<number>>;
+    type: string;
+}
+
+export interface IRouteLeg {
+    annotation: IAnnotation;
+    duration: number;
+    distance: number;
+}
+
+export interface IAnnotation {
+    duration: Array<number>;
+}
+
+export interface IWaypointInfo {
+    name: string;
+    route: IRoute;
+    positionAfterTime: ILocation;
+    distance: number;
+}
+
 /**
  * TypeGuard for type Location
  */
@@ -39,7 +68,7 @@ export const isWaypoint = (body: any | IWaypoint): body is IWaypoint => {
  * Check for whole array if it consists solely of Waypoints
  */
 export const isWaypointsArray = (body: any | Array<IWaypoint>) => {
-    if (!body || !body.length) {
+    if (!Array.isArray(body)) {
         return false;
     }
     for (const singleWaypoint of body) {
