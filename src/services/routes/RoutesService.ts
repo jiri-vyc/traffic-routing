@@ -54,11 +54,18 @@ export class RoutesService {
         });
         const winner = newWaypoints[0];
 
+        let delays: {
+            [key: string]: number,
+        } = {};
+
+        // Calculate delays here
+        for (const singleWaypoint of newWaypoints) {
+            delays[singleWaypoint.name] = (singleWaypoint.name, this.FindTimeUntilPositionTo(origin, destination, singleWaypoint.route, winner.distance));
+        }
+
         return {
             winner_name: winner.name,
-            delays: {
-                "A": 0,
-            },
+            delays
         };
     }
 
@@ -109,5 +116,12 @@ export class RoutesService {
         const result = Math.sqrt( (destination.lon - origin.lon) * (destination.lon - origin.lon) + (destination.lat - origin.lat) * (destination.lat - origin.lat) );
         log.debug(`Distance between ${origin.lat},${origin.lon} and ${destination.lat},${destination.lon} is ${result}`)
         return result;
+    }
+
+    /**
+     * Reversely finds the time at which the car on the route will have the desired distance to target destination
+     */
+    private FindTimeUntilPositionTo = (origin: ILocation, destination: ILocation, route: IRoute, targetDistance: number): number => {
+        return 0;
     }
 }

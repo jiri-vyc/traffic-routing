@@ -35,28 +35,32 @@ test('FindBestAlternative', async t => {
     t.deepEqual(await res, {
             winner_name: "Frankfurt",
             delays: {
-                "A": 0,
+                "Frankfurt": 0,
+                "Ostrava": 0
             },
         });
     const res2 = new RoutesService().FindBestAlternative(testWaypoints.frankfurt, testWaypoints.norimberk, 7200, [testWaypoints.berlin, testWaypoints.mnichov]);
     t.deepEqual(await res2, {
             winner_name: "Mnichov",
             delays: {
-                "A": 0,
+                "Berlin": 0,
+                "Mnichov": 0
             },
         });
     const res3 = new RoutesService().FindBestAlternative(testWaypoints.norimberk, testWaypoints.berlin, 7200, [testWaypoints.ostrava, testWaypoints.mnichov]);
         t.deepEqual(await res3, {
                 winner_name: "Ostrava",
                 delays: {
-                    "A": 0,
+                    "Ostrava": 0,
+                    "Mnichov": 0
                 },
             });
     const res4 = new RoutesService().FindBestAlternative(testWaypoints.norimberk, testWaypoints.berlin, 14400, [testWaypoints.ostrava, testWaypoints.mnichov]);
         t.deepEqual(await res4, {
                 winner_name: "Mnichov",
                 delays: {
-                    "A": 0,
+                    "Ostrava": 0,
+                    "Mnichov": 0
                 },
             });
 });
