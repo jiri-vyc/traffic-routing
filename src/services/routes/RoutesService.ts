@@ -28,16 +28,25 @@ export class RoutesService {
         let newWaypoints: Array<IWaypointInfo> = [];
         for (const singleWaypoint of waypoints) {
             const name = singleWaypoint.name;
-            const route = await this.FindSingleRoute(origin, destination, singleWaypoint);
-            const positionAfterTime = this.FindPositionOnRouteInTime(route, time);
-            const distance = this.CalculateStraightDistance(positionAfterTime, destination);
-            const waypointInfo = {
-                name,
-                route,
-                positionAfterTime,
-                distance,
-            };
-            newWaypoints.push(waypointInfo);
+            try {
+                const route = await this.FindSingleRoute(origin, destination, singleWaypoint);
+                // log.debug(JSON.stringify(route.geometry));
+                const positionAfterTime = this.FindPositionOnRouteInTime(route, time);
+                const distance = this.CalculateStraightDistance(positionAfterTime, destination);
+                const waypointInfo = {
+                    name,
+                    route,
+                    positionAfterTime,
+                    distance,
+                };
+                newWaypoints.push(waypointInfo);
+            } catch (e) {
+                if (e.message === "route_not_found") {
+                    continue;
+                } else {
+                    throw e;
+                }
+            }
         };
         newWaypoints.sort((prev, next) => {
             return prev.distance - next.distance;
@@ -45,32 +54,34 @@ export class RoutesService {
         const winner = newWaypoints[0];
 
         return {
-            winner_name: "A",
+            winner_name: winner.name,
             delays: {
                 "A": 0,
             },
         };
     }
 
-    private ConstructOSRMApiCall = (origin: ILocation, destination: ILocation, waypoint: IWaypoint) => {
+    private ConstructOSRMApiCall = (origin: ILocation, destination: ILocation, waypoint: IWaypoint, full: boolean = true) => {
         return `${this.routingEngineBaseUrl}/route/v1/driving/` +
             `${origin.lon},${origin.lat};` +
             `${waypoint.lon},${waypoint.lat};` +
             `${destination.lon},${destination.lat}` +
-            `?geometries=geojson&annotations=duration&overview=full`;
+            `?geometries=geojson` + 
+            ( full ? `&annotations=duration&overview=full` : `` );
     }
 
-    private FindSingleRoute = async (origin: ILocation, destination: ILocation, waypoint: IWaypoint): Promise<IRoute> => {
-        const apiUrl = this.ConstructOSRMApiCall(origin, destination, waypoint);
+    private FindSingleRoute = async (origin: ILocation, destination: ILocation, waypoint: IWaypoint, full: boolean = true): Promise<IRoute> => {
+        const apiUrl = this.ConstructOSRMApiCall(origin, destination, waypoint, full);
         let response;
         try {
             response = await axios.get(apiUrl);
-            console.log(response.data.routes[0]);
-            return response.data.routes[0];
         } catch (err) {
-            console.log(err);
             throw new Error("Error while handling the request.");
         }
+        if (!response || !response.data || !response.data.routes || !response.data.routes[0]) {
+            throw new Error("route_not_found");
+        }
+        return response.data.routes[0];
     }
 
     private FindPositionOnRouteInTime = (route: IRoute, time: number): ILocation => {
