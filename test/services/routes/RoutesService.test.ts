@@ -59,4 +59,11 @@ test('FindBestAlternative', async t => {
                     "A": 0,
                 },
             });
+    const res5 = new RoutesService().FindBestAlternative(testWaypoints.berlin, testWaypoints.mnichov, 14400, [testWaypoints.frankfurt, testWaypoints.ostrava, testWaypoints.norimberk ]);
+        t.deepEqual(await res5, {
+                winner_name: "Norimberk",
+                delays: {
+                    "A": 0,
+                },
+            });
 });

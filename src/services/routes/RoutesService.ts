@@ -31,7 +31,6 @@ export class RoutesService {
             const name = singleWaypoint.name;
             try {
                 const route = await this.FindSingleRoute(origin, destination, singleWaypoint);
-                // log.debug(JSON.stringify(route.geometry));
                 const positionAfterTime = this.FindPositionOnRouteInTime(route, time);
                 const distance = this.CalculateStraightDistance(positionAfterTime, destination);
                 const waypointInfo = {
@@ -62,6 +61,9 @@ export class RoutesService {
         };
     }
 
+    /**
+     * Construct the correct URL for the routing service based on parameters
+     */
     private ConstructOSRMApiCall = (origin: ILocation, destination: ILocation, waypoint: IWaypoint, full: boolean = true) => {
         return `${this.routingEngineBaseUrl}/route/v1/driving/` +
             `${origin.lon},${origin.lat};` +
@@ -71,6 +73,9 @@ export class RoutesService {
             ( full ? `&annotations=duration&overview=full` : `` );
     }
 
+    /**
+     * Finds a single route between point A and point B with one waypoint in between
+     */
     private FindSingleRoute = async (origin: ILocation, destination: ILocation, waypoint: IWaypoint, full: boolean = true): Promise<IRoute> => {
         const apiUrl = this.ConstructOSRMApiCall(origin, destination, waypoint, full);
         let response;
@@ -89,13 +94,16 @@ export class RoutesService {
         let currentTime = 0;
         let i = 0;
         let allDurations: Array<number> = [];
+        // Get all segments durations
         for (const duration of route.legs) {
             allDurations = allDurations.concat(duration.annotation.duration);
         }
+        // Find index where sum of all durations so far reaches target ride time
         while (i < allDurations.length && currentTime < targetTime){
             currentTime += allDurations[i];
             i++;
         }
+        // Position in target time is location of segment on the same index
         const result = {
             lat: route.geometry.coordinates[i][1],
             lon: route.geometry.coordinates[i][0],
@@ -104,7 +112,7 @@ export class RoutesService {
         return result;
     }
 
-    // TODO: Placeholder, but will work most of the time
+    // TODO: Placeholder, but will work most of the time, simple point distance on 2d plane
     private CalculateStraightDistance = (origin: ILocation, destination: ILocation) => {
         const result = Math.sqrt( (destination.lon - origin.lon) * (destination.lon - origin.lon) + (destination.lat - origin.lat) * (destination.lat - origin.lat) );
         log.debug(`Distance between ${origin.lat},${origin.lon} and ${destination.lat},${destination.lon} is ${result}`)
