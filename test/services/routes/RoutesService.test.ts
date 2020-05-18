@@ -67,7 +67,9 @@ test('FindBestAlternative', async t => {
         t.deepEqual(await res5, {
                 winner_name: "Norimberk",
                 delays: {
-                    "A": 0,
+                    "Ostrava": 0,
+                    "Norimberk": 0,
+                    "Frankfurt": 0
                 },
             });
 });
