@@ -1,4 +1,4 @@
 export const config = {
-    port: "3000",
-    log_level: "debug",
+    port: process.env.PORT,
+    log_level: process.env.LOG_LEVEL,
 }

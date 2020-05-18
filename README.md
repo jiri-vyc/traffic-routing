@@ -16,3 +16,10 @@ Run in dev mode (watching for changes and re-building on save) `npm run dev-star
 
 Run in production mode `npm start`.
 
+## Test
+
+`npm test`
+
+## Configuration
+
+To set the ENV variables, either set them in your environment, or copy `.env.example` file to `.env` - the application uses `dotenv` package and will load ENV variables from there.
