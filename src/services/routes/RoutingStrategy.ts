@@ -84,7 +84,6 @@ export class FlightRoutingStrategy extends RoutingStrategy {
     // TODO: Placeholder, but will work most of the time, simple point distance on 2d plane
     public GetDistance = async (origin: ILocation, destination: ILocation) => {
         const result = Math.sqrt( (destination.lon - origin.lon) * (destination.lon - origin.lon) + (destination.lat - origin.lat) * (destination.lat - origin.lat) );
-        log.debug(`Distance between ${origin.lat},${origin.lon} and ${destination.lat},${destination.lon} is ${result}`);
         return result;
     }
 

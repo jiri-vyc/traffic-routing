@@ -22,7 +22,7 @@ export class RoutesService {
             throw new Error("Wrong input parameters for finding a route.");
         };
         log.debug(`Finding route from ${origin.lat},${origin.lon} to ${destination.lat},${destination.lon}`);
-        waypoints.forEach((waypoint) => log.debug(`through waypoint: ${waypoint.lat},${waypoint.lon}`));
+        waypoints.forEach((waypoint) => log.debug(`through waypoint: ${waypoint.lat},${waypoint.lon} (${waypoint.name})`));
 
         return this.ComputeFindBestAlternative(origin, destination, time, waypoints);
     }
@@ -65,7 +65,7 @@ export class RoutesService {
 
         // Calculate delays here
         for (const singleWaypoint of newWaypoints) {
-            delays[singleWaypoint.name] = await this.FindTimeUntilPositionTo(destination, singleWaypoint.route, winner.distance);
+            delays[singleWaypoint.name] = await this.FindTimeUntilPositionTo(destination, singleWaypoint.route, winner.distance, time);
         }
 
         return {
@@ -88,17 +88,23 @@ export class RoutesService {
     /**
      * Reversely finds the time at which the car on the route will have the desired distance to target destination
      */
-    private FindTimeUntilPositionTo = async (destination: ILocation, route: IRoute, targetDistance: number): Promise<number> => {
-        return 0;
-        // TODO: implement
+    private FindTimeUntilPositionTo = async (destination: ILocation, route: IRoute, targetDistance: number, refTime: number): Promise<number> => {
         const allDurations = this.GetAllSegmentDurations(route);
         let currentTime = 0;
         for (const i in allDurations) {
-            if (await this.finishingRoutingStrategy.GetDistance({lat: route.geometry.coordinates[i][1], lon: route.geometry.coordinates[i][0]}, destination) <= targetDistance) {
+            const currentLocation = { lat: route.geometry.coordinates[i][1], lon: route.geometry.coordinates[i][0] };
+            const distanceToDestination = await this.finishingRoutingStrategy.GetDistance(currentLocation, destination);
+            // currentTime >= refTime because car could've been closer to destination earlier on route
+            if (distanceToDestination <= targetDistance && currentTime >= refTime) {
                 break;
             }
             currentTime += allDurations[i];
         }
-        return currentTime;
+        const returnTime = this.RoundToMinutes(currentTime - refTime);
+        return returnTime;
+    }
+
+    private RoundToMinutes = (timeInSeconds: number) => {
+        return timeInSeconds - (timeInSeconds % 60);
     }
 }

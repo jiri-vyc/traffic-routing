@@ -6,6 +6,8 @@ The results can be slightly not precise - 1 index off (1 more record in geometry
 
 What if the routes are identical up until certain point = the result is then chosen by random (the first is taken), should not be against specs
 
+"Anomaly" in route Norimberk->Berlin through Ostrava and others - car can be closer to the destination earlier on the route than on targetTime. Then when searching for when car will be as close as the final distance, the time can be lower than targetTime!
+
 Naive implementation: what can be improved:
 - make the requests in parallel, promise.all after getting all route data from OSRM
 - then promise.all on calculating position after time and distance
