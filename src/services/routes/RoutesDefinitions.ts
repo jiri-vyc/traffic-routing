@@ -19,6 +19,8 @@ export interface IRoute {
     legs: Array<IRouteLeg>;
     duration: number;
     distance: number;
+    weight_name?: string;
+    weight?: number;
 }
 
 export interface IGeometry {
@@ -30,6 +32,9 @@ export interface IRouteLeg {
     annotation: IAnnotation;
     duration: number;
     distance: number;
+    summary?: string;
+    weight?: number;
+    steps?: Array<any>;
 }
 
 export interface IAnnotation {
