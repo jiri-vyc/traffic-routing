@@ -4,7 +4,7 @@
         "build-start": "tsc && node .\\dist\\Server.js",
         "build": "tsc",
         "dev-start": "ts-node-dev -r dotenv/config .\\src\\Server.ts",
-        "test": "ava"
+        "test": "ava --verbose"
     },
     "dependencies": {
         "axios": "^0.19.2",
@@ -25,6 +25,7 @@
         "extensions": [
             "ts"
         ],
+        "failFast": false,
         "files": [
             "test/**/*.test.ts"
         ],

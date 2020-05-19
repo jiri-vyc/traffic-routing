@@ -9,7 +9,17 @@ export abstract class RoutingStrategy {
      */
     public abstract async FindSingleRoute(origin: ILocation, destination: ILocation, waypoint: IWaypoint, full?: boolean): Promise<IRoute>;
     public abstract async FindPositionOnRouteInTime(route: IRoute, targetTime: number): Promise<ILocation>;
-    public abstract async GetDistance(origin: ILocation, destination: ILocation): Promise<number>;
+    public abstract async GetDistance(origin: ILocation, destination: ILocation): Promise<number>;    
+    /**
+    * Gets all segments durations annotations as a single array
+    */ 
+    public GetAllSegmentDurations = (route: IRoute) => {
+        let allDurations: Array<number> = [];
+        for (const duration of route.legs) {
+            allDurations = allDurations.concat(duration.annotation.duration);
+        }
+        return allDurations;
+    }
 }
 
 export class OSRMCarRoutingStrategy extends RoutingStrategy {
@@ -45,11 +55,7 @@ export class OSRMCarRoutingStrategy extends RoutingStrategy {
     public FindPositionOnRouteInTime = async (route: IRoute, targetTime: number): Promise<ILocation> => {
         let currentTime = 0;
         let i = 0;
-        let allDurations: Array<number> = [];
-        // Get all segments durations
-        for (const duration of route.legs) {
-            allDurations = allDurations.concat(duration.annotation.duration);
-        }
+        let allDurations = this.GetAllSegmentDurations(route);
         // Find index where sum of all durations so far reaches target ride time
         while (i < allDurations.length && currentTime < targetTime){
             currentTime += allDurations[i];
@@ -84,7 +90,6 @@ export class FlightRoutingStrategy extends RoutingStrategy {
     // TODO: Placeholder, but will work most of the time, simple point distance on 2d plane
     public GetDistance = async (origin: ILocation, destination: ILocation) => {
         const result = Math.sqrt( (destination.lon - origin.lon) * (destination.lon - origin.lon) + (destination.lat - origin.lat) * (destination.lat - origin.lat) );
-        log.debug(`Distance between ${origin.lat},${origin.lon} and ${destination.lat},${destination.lon} is ${result}`);
         return result;
     }
 
