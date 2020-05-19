@@ -20,6 +20,6 @@ TODO:
 - add more Unit tests, add API tests (controllers, middleware - e.g. `supertest`)
 - add TSlint
 - improve error handling
-- solve accesability of `full` parameter in `ConstructOSRMApiCall` - designed for debugging, should not be used and currently it's not error handled correctly if it is (routes don't have neccessary data then)
+- solve accesibility of `full` parameter in `ConstructOSRMApiCall` - designed for debugging, should not be used and currently it's not error handled correctly if it is (routes don't have neccessary data then)
 - replace placeholder GetDistance() method - calculate GEO distance (using Haversine formula or approximation)
 - finish implementation of Routing strategies fully - full route for Flight, duration/distance for Car

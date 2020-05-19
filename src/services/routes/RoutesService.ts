@@ -75,21 +75,10 @@ export class RoutesService {
     }
 
     /**
-     * Gets all segments durations annotations as a single array
-     */ 
-    private GetAllSegmentDurations = (route: IRoute) => {
-        let allDurations: Array<number> = [];
-        for (const duration of route.legs) {
-            allDurations = allDurations.concat(duration.annotation.duration);
-        }
-        return allDurations;
-    }
-
-    /**
      * Reversely finds the time at which the car on the route will have the desired distance (targetDistance) to target destination. At refTime at the earliest.
      */
     private FindTimeUntilPositionTo = async (destination: ILocation, route: IRoute, targetDistance: number, refTime: number): Promise<number> => {
-        const allDurations = this.GetAllSegmentDurations(route);
+        const allDurations = this.routingStrategy.GetAllSegmentDurations(route);
         let currentTime = 0;
         for (const i in allDurations) {
             const currentLocation = { lat: route.geometry.coordinates[i][1], lon: route.geometry.coordinates[i][0] };

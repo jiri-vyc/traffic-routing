@@ -46,7 +46,6 @@ export interface IWaypointInfo {
     route: IRoute;
     positionAfterTime: ILocation;
     distance: number;
-    delay?: number;
 }
 
 /**
