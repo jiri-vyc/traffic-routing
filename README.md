@@ -1,3 +1,13 @@
+# General description
+
+Listens on `GET /` route for health check/app status.
+
+Listens on `POST /routes/best-alternative` for finding best routing alternative according to specification.
+
+Default port is 3000.
+
+Requires the `x-secret` header according to specification.
+
 # Prerequisites
 
 - Node.js
