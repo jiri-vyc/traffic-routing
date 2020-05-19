@@ -15,5 +15,6 @@ Naive implementation: what can be improved:
 TODO:
 - implement delays
 - add API docs (swagger, apiary)
-- add more tests
+- add more Unit tests, add API tests (controllers, middleware - e.g. `supertest`)
 - add TSlint
+- improve error handling

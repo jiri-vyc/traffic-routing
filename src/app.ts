@@ -21,7 +21,7 @@ export class App {
      * Runs configuration methods on the Express instance
      */
     constructor() {
-        this.port = parseInt(config.port || "3000", 10)
+        this.port = parseInt(config.port || "3000", 10);
         this.express = express();
     }
 
