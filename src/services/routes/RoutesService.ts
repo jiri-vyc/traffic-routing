@@ -1,9 +1,15 @@
 import { log } from "../../helpers/Logger";
 import { isLocation, isWaypointsArray, ILocation, IWaypoint, IRoute, IWinnerWithDelaysResponse, IWaypointInfo } from "./RoutesDefinitions";
-const axios = require('axios').default;
+import { RoutingStrategy, OSRMCarRoutingStrategy, FlightRoutingStrategy } from "./RoutingStrategy";
 
 export class RoutesService {
-    private routingEngineBaseUrl = "http://router.project-osrm.org";
+    private routingStrategy: RoutingStrategy;
+    private finishingRoutingStrategy: RoutingStrategy;
+
+    public constructor(inRoutingStrategy?: RoutingStrategy) {
+        this.routingStrategy = inRoutingStrategy || new OSRMCarRoutingStrategy();
+        this.finishingRoutingStrategy = new FlightRoutingStrategy();
+    }
 
     /**
      * Public method to find a best of all routes between origin and destination through waypoints and calculates delays for alternatives.
@@ -14,7 +20,7 @@ export class RoutesService {
     public FindBestAlternative = async (origin: ILocation, destination: ILocation, time: number, waypoints: Array<IWaypoint>): Promise<IWinnerWithDelaysResponse> => {
         if (!isLocation(origin) || !isLocation(destination) || isNaN(time) || !isWaypointsArray(waypoints)) {
             throw new Error("Wrong input parameters for finding a route.");
-        }
+        };
         log.debug(`Finding route from ${origin.lat},${origin.lon} to ${destination.lat},${destination.lon}`);
         waypoints.forEach((waypoint) => log.debug(`through waypoint: ${waypoint.lat},${waypoint.lon}`));
 
@@ -30,9 +36,9 @@ export class RoutesService {
         for (const singleWaypoint of waypoints) {
             const name = singleWaypoint.name;
             try {
-                const route = await this.FindSingleRoute(origin, destination, singleWaypoint);
-                const positionAfterTime = this.FindPositionOnRouteInTime(route, time);
-                const distance = this.CalculateStraightDistance(positionAfterTime, destination);
+                const route = await this.routingStrategy.FindSingleRoute(origin, destination, singleWaypoint);
+                const positionAfterTime = await this.routingStrategy.FindPositionOnRouteInTime(route, time);
+                const distance = await this.finishingRoutingStrategy.GetDistance(positionAfterTime, destination);
                 const waypointInfo = {
                     name,
                     route,
@@ -41,7 +47,7 @@ export class RoutesService {
                 };
                 newWaypoints.push(waypointInfo);
             } catch (e) {
-                if (e.message === "route_not_found") {
+                if (e.message === RoutingStrategy.ROUTE_NOT_FOUND_ERROR_MESSAGE) {
                     continue;
                 } else {
                     throw e;
@@ -56,66 +62,8 @@ export class RoutesService {
         return {
             winner_name: winner.name,
             delays: {
-                "A": 0,
+                "placeholder_name": 0,
             },
         };
-    }
-
-    /**
-     * Construct the correct URL for the routing service based on parameters
-     */
-    private ConstructOSRMApiCall = (origin: ILocation, destination: ILocation, waypoint: IWaypoint, full: boolean = true) => {
-        return `${this.routingEngineBaseUrl}/route/v1/driving/` +
-            `${origin.lon},${origin.lat};` +
-            `${waypoint.lon},${waypoint.lat};` +
-            `${destination.lon},${destination.lat}` +
-            `?geometries=geojson` + 
-            ( full ? `&annotations=duration&overview=full` : `` );
-    }
-
-    /**
-     * Finds a single route between point A and point B with one waypoint in between
-     */
-    private FindSingleRoute = async (origin: ILocation, destination: ILocation, waypoint: IWaypoint, full: boolean = true): Promise<IRoute> => {
-        const apiUrl = this.ConstructOSRMApiCall(origin, destination, waypoint, full);
-        let response;
-        try {
-            response = await axios.get(apiUrl);
-        } catch (err) {
-            throw new Error("Error while handling the request.");
-        }
-        if (!response || !response.data || !response.data.routes || !response.data.routes[0]) {
-            throw new Error("route_not_found");
-        }
-        return response.data.routes[0];
-    }
-
-    private FindPositionOnRouteInTime = (route: IRoute, targetTime: number): ILocation => {
-        let currentTime = 0;
-        let i = 0;
-        let allDurations: Array<number> = [];
-        // Get all segments durations
-        for (const duration of route.legs) {
-            allDurations = allDurations.concat(duration.annotation.duration);
-        }
-        // Find index where sum of all durations so far reaches target ride time
-        while (i < allDurations.length && currentTime < targetTime){
-            currentTime += allDurations[i];
-            i++;
-        }
-        // Position in target time is location of segment on the same index
-        const result = {
-            lat: route.geometry.coordinates[i][1],
-            lon: route.geometry.coordinates[i][0],
-        };
-        log.debug(`After time ${targetTime} the car is at position ${result.lat},${result.lon}`);
-        return result;
-    }
-
-    // TODO: Placeholder, but will work most of the time, simple point distance on 2d plane
-    private CalculateStraightDistance = (origin: ILocation, destination: ILocation) => {
-        const result = Math.sqrt( (destination.lon - origin.lon) * (destination.lon - origin.lon) + (destination.lat - origin.lat) * (destination.lat - origin.lat) );
-        log.debug(`Distance between ${origin.lat},${origin.lon} and ${destination.lat},${destination.lon} is ${result}`)
-        return result;
     }
 }
