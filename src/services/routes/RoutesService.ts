@@ -86,7 +86,7 @@ export class RoutesService {
     }
 
     /**
-     * Reversely finds the time at which the car on the route will have the desired distance to target destination
+     * Reversely finds the time at which the car on the route will have the desired distance (targetDistance) to target destination. At refTime at the earliest.
      */
     private FindTimeUntilPositionTo = async (destination: ILocation, route: IRoute, targetDistance: number, refTime: number): Promise<number> => {
         const allDurations = this.GetAllSegmentDurations(route);
@@ -94,7 +94,7 @@ export class RoutesService {
         for (const i in allDurations) {
             const currentLocation = { lat: route.geometry.coordinates[i][1], lon: route.geometry.coordinates[i][0] };
             const distanceToDestination = await this.finishingRoutingStrategy.GetDistance(currentLocation, destination);
-            // currentTime >= refTime because car could've been closer to destination earlier on route
+            // currentTime >= refTime because car could've been closer to destination earlier on route, so disregarding those
             if (distanceToDestination <= targetDistance && currentTime >= refTime) {
                 break;
             }

@@ -15,6 +15,7 @@ Naive implementation: what can be improved:
 - then calculate delays in parallel
 
 TODO:
+- remove rounding and approximation (delays mostly)
 - add API docs (swagger, apiary)
 - add more Unit tests, add API tests (controllers, middleware - e.g. `supertest`)
 - add TSlint
