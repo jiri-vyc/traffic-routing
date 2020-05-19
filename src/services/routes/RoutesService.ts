@@ -59,8 +59,11 @@ export class RoutesService {
 
         // Calculate delays here
         for (const singleWaypoint of newWaypoints) {
-            delays[singleWaypoint.name] = (singleWaypoint.name, this.FindTimeUntilPositionTo(origin, destination, singleWaypoint.route, winner.distance));
+            delays[singleWaypoint.name] = (singleWaypoint.name, this.FindTimeUntilPositionTo(destination, singleWaypoint.route, winner.distance)) - time;
         }
+
+        console.log(winner.name);
+        console.log(delays);
 
         return {
             winner_name: winner.name,
@@ -100,11 +103,8 @@ export class RoutesService {
     private FindPositionOnRouteInTime = (route: IRoute, targetTime: number): ILocation => {
         let currentTime = 0;
         let i = 0;
-        let allDurations: Array<number> = [];
-        // Get all segments durations
-        for (const duration of route.legs) {
-            allDurations = allDurations.concat(duration.annotation.duration);
-        }
+        let allDurations: Array<number> = this.GetAllSegmentDurations(route);
+
         // Find index where sum of all durations so far reaches target ride time
         while (i < allDurations.length && currentTime < targetTime){
             currentTime += allDurations[i];
@@ -119,17 +119,36 @@ export class RoutesService {
         return result;
     }
 
+    /**
+     * Gets all segments durations annotations as a single array
+     */ 
+    private GetAllSegmentDurations = (route: IRoute) => {
+        let allDurations: Array<number> = [];
+        for (const duration of route.legs) {
+            allDurations = allDurations.concat(duration.annotation.duration);
+        }
+        return allDurations;
+    }
+
     // TODO: Placeholder, but will work most of the time, simple point distance on 2d plane
     private CalculateStraightDistance = (origin: ILocation, destination: ILocation) => {
         const result = Math.sqrt( (destination.lon - origin.lon) * (destination.lon - origin.lon) + (destination.lat - origin.lat) * (destination.lat - origin.lat) );
-        log.debug(`Distance between ${origin.lat},${origin.lon} and ${destination.lat},${destination.lon} is ${result}`)
+        log.debug(`Distance between ${origin.lat},${origin.lon} and ${destination.lat},${destination.lon} is ${result}`);
         return result;
     }
 
     /**
      * Reversely finds the time at which the car on the route will have the desired distance to target destination
      */
-    private FindTimeUntilPositionTo = (origin: ILocation, destination: ILocation, route: IRoute, targetDistance: number): number => {
-        return 0;
+    private FindTimeUntilPositionTo = (destination: ILocation, route: IRoute, targetDistance: number): number => {
+        const allDurations = this.GetAllSegmentDurations(route);
+        let currentTime = 0;
+        for (const i in allDurations) {
+            if (this.CalculateStraightDistance({lat: route.geometry.coordinates[i][1], lon: route.geometry.coordinates[i][0]}, destination) <= targetDistance) {
+                break;
+            }
+            currentTime += allDurations[i];
+        }
+        return currentTime;
     }
 }
